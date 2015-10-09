@@ -1,5 +1,6 @@
 import os
 import urllib
+import sys
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
@@ -13,85 +14,104 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
-DEFAULT_GUESTBOOK_NAME = 'default_guestbook'
+# Store all the events with the same key just because google said it is 
+# necessary
+DEFAULT_EVENT_BOX = '-'
 
-# We set a parent key on the 'Greetings' to ensure that they are all
-# in the same entity group. Queries across the single entity group
-# will be consistent.  However, the write rate should be limited to
-# ~1/second.
+def events_key():
+    return ndb.Key('global', DEFAULT_EVENT_BOX)
 
-def guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):
-    """Constructs a Datastore key for a Guestbook entity.
+def event_guests_key(event_name):
+    return ndb.Key('Event', event_name)
 
-    We use guestbook_name as the key.
-    """
-    return ndb.Key('Guestbook', guestbook_name)
+class Event(ndb.Model):
+    name = ndb.StringProperty()
+    capacity = ndb.StringProperty()
+    # Amount of Guests in the Event
+    guests = ndb.StringProperty(indexed=False)
 
 
-class Author(ndb.Model):
-    """Sub model for representing an author."""
-    identity = ndb.StringProperty(indexed=False)
+class Guest(ndb.Model):
     email = ndb.StringProperty(indexed=False)
-
-
-class Greeting(ndb.Model):
-    """A main model for representing an individual Guestbook entry."""
-    author = ndb.StructuredProperty(Author)
-    content = ndb.StringProperty(indexed=False)
-    date = ndb.DateTimeProperty(auto_now_add=True)
+    name = ndb.StringProperty(indexed=False)
+    surname = ndb.StringProperty(indexed=False)
+    company = ndb.StringProperty(indexed=False)
 
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
-        guestbook_name = self.request.get('guestbook_name',
-                                          DEFAULT_GUESTBOOK_NAME)
-        greetings_query = Greeting.query(
-            ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
-        greetings = greetings_query.fetch(10)
-
-        user = users.get_current_user()
-        if user:
-            url = users.create_logout_url(self.request.uri)
-            url_linktext = 'Logout'
-        else:
-            url = users.create_login_url(self.request.uri)
-            url_linktext = 'Login'
+        events_query = Event.query(ancestor=events_key())
+        events = events_query.fetch()
 
         template_values = {
-            'user': user,
-            'greetings': greetings,
-            'guestbook_name': urllib.quote_plus(guestbook_name),
-            'url': url,
-            'url_linktext': url_linktext,
+            'events': events
         }
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
 
 
-class Guestbook(webapp2.RequestHandler):
+class AddGuest(webapp2.RequestHandler):
+    @ndb.transactional(retries=3)
+    def increment_guest_count(self, event_name):
+        try:
+            events_query = Event(ancestor=event_key())
+            events = events_query.fetch()
+
+            for event in events:
+                if event.name == event_name:
+                    # We found the event. increment the count
+                    sys.exit(-1)
+                    if int(event.capacity) > int(event.guests):
+                        amount_guests = int(event.guests) + 1
+                        event.guests = str(amount_guests)
+                        event.put()
+                        break
+                    else:
+                        return False
+        except TransactionFailedError:
+            # Exit in this case
+            sys.exit(-1)
+        finally:
+            return True
+
     def post(self):
-        # We set the same parent key on the 'Greeting' to ensure each
-        # Greeting is in the same entity group. Queries across the
-        # single entity group will be consistent. However, the write
-        # rate to a single entity group should be limited to
-        # ~1/second.
-        guestbook_name = self.request.get('guestbook_name',
-                                          DEFAULT_GUESTBOOK_NAME)
-        greeting = Greeting(parent=guestbook_key(guestbook_name))
+        event_name = self.request.get('guest_event_name')
+        self.increment_guest_count(event_name)
 
-        if users.get_current_user():
-            greeting.author = Author(
-                    identity=users.get_current_user().user_id(),
-                    email=users.get_current_user().email())
+        # Add the guest
+        guest = Guest(parent=event_guests_key("Mon"))
+        guest.name = self.request.get('guest_name')
+        guest.surname = self.request.get('guest_surname')
+        guest.email = self.request.get('guest_email')
+        guest.company = self.request.get('guest_company')
+        guest.put()
 
-        greeting.content = self.request.get('content')
-        greeting.put()
-
-        query_params = {'guestbook_name': guestbook_name}
+        query_params = {'event_name': event_name}
         self.redirect('/?' + urllib.urlencode(query_params))
+
+
+class EventsCreation(webapp2.RequestHandler):
+    def post(self):
+        # Get all the events to check if the event already exists
+        name = self.request.get('event_name')
+        # TODO: Check if this is a number
+        capacity = int(self.request.get('event_capacity'))
+
+        # Upload a new event if this name and capacity are valid
+        if name:
+            event = Event(parent=events_key())
+            event.name = name
+            event.capacity = str(capacity)
+            event.guests = str(0)
+            event.put()
+
+        query_params = {'event_name': name}
+        self.redirect('/?' + urllib.urlencode(query_params))
+
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/sign', Guestbook),
+    ('/event_creation', EventsCreation),
+    ('/add_guest', AddGuest),
 ], debug=True)

@@ -5,32 +5,94 @@
     <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
   </head>
   <body>
-    {% for greeting in greetings %}
-      {% if greeting.author %}
-        <b>{{ greeting.author.email }}
-          {% if user and user.user_id() == greeting.author.identity %}
-            (You)
-          {% endif %}
-        </b> wrote:
-      {% else %}
-       An anonymous person wrote:
-      {% endif %}
-      <blockquote>{{ greeting.content }}</blockquote>
-    {% endfor %}
+    <h1>Towers' Event Hosting Web Page</h1>
 
-    <form action="/sign?guestbook_name={{ guestbook_name }}" method="post">
-      <div><textarea name="content" rows="3" cols="60"></textarea></div>
-      <div><input type="submit" value="Sign Guestbook"></div>
+    <form action="/event_creation" method="post">
+      <h2>Create a new Event:</h2>
+      <br>
+      <label>Event Name:</label>
+      <input type="text" name="event_name">
+      <br>
+
+      <label>Event Capacity:</label>
+      <input type="text" name="event_capacity">
+      <br>
+
+      <input type="submit" value="Add Event">
     </form>
 
     <hr>
 
-    <form>Guestbook name:
-      <input value="{{ guestbook_name }}" name="guestbook_name">
-      <input type="submit" value="switch">
+    <form action="/event_management" method="post">
+      <label>Choose an event: </label>
+      <select id = "event_dropdown" onchange="updateSelectedEventData()">
+        <option value="" disabled selected style="display:none;">-</option>
+        {% for event in events %}
+        <option value="{{event.name}}">{{event.name}}</option>
+        {% endfor %}
+      </select>
+      <br>
+
+      <label id="event_capacity">Event Capacity: 0</label>
+      <br>
+      <label id="event_guests">Suscribed Guests: 0</label>
+
     </form>
 
-    <a href="{{ url|safe }}">{{ url_linktext }}</a>
+    <hr>
+
+    {% if events|length > 0 %}
+      <form id="guests_form" action="/add_guest" method="post">
+        <h3> {{ event_name }} </h3>
+        <label>Name:</label>
+        <input type="text" name="guest_name">
+        <br>
+
+        <label>Surname:</label>
+        <input type="text" name="guest_surname">
+        <br>
+
+        <label>E-Mail:</label>
+        <input type="text" name="guest_email">
+        <br>
+
+        <label>Company:</label>
+        <input type="text" name="guest_company">
+        <br>
+
+        <input type="submit" value="Join">
+        <input type="hidden" id="guest_event_name" name="guest_event_name" onsubmit="return setValue();">
+      </form>
+    {% endif %}
+
+    <hr>
+
+    <script type="text/javascript">
+      function setValue() {
+        alert("Value of: MONDONGO!!!")
+        var e = document.getElementById("event_dropdown");
+        var value = e.options[e.selectedIndex].value
+        document.getElementById("guest_event_name").value = value
+        alert("Value of: " + value)
+        return value        
+      }
+
+
+      function updateSelectedEventData() {
+        var e = document.getElementById("event_dropdown");
+        var value = e.options[e.selectedIndex].value;
+
+        {% for event in events %}
+          if (value == "{{event.name}}") {
+            document.getElementById("event_capacity").innerHTML
+              = 'Event Capacity: ' + "{{event.capacity}}";
+            document.getElementById("event_guests").innerHTML
+              = 'Suscribed Guests: ' + "{{event.guests}}";
+          }
+        {% endfor %}
+        return;
+      }
+    </script>
 
   </body>
 </html>
