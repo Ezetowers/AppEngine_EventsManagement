@@ -3,6 +3,7 @@
 <html>
   <head>
     <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
   </head>
   <body>
     <h1>Towers' Event Hosting Web Page</h1>
@@ -42,30 +43,45 @@
     <hr>
 
     {% if events|length > 0 %}
-      <form id="guests_form" action="/add_guest" method="post">
+      <form id="guestsForm" action="/add_guest" method="post">
         <h3> {{ event_name }} </h3>
         <label>Name:</label>
-        <input type="text" name="guest_name">
+        <input type="text" name="guestName">
         <br>
 
         <label>Surname:</label>
-        <input type="text" name="guest_surname">
+        <input type="text" name="guestSurname">
         <br>
 
         <label>E-Mail:</label>
-        <input type="text" name="guest_email">
+        <input type="text" name="guestEmail">
         <br>
 
         <label>Company:</label>
-        <input type="text" name="guest_company">
+        <input type="text" name="guestCompany">
         <br>
 
         <input type="submit" value="Join">
-        <input type="hidden" id="guest_event_name" name="guest_event_name" onsubmit="return setValue();">
       </form>
     {% endif %}
 
     <hr>
+
+
+    <script>
+        $("#guestsForm").submit(function(event) {
+            // Abort the GET or POST sent by the form. We want to do this manually
+            event.preventDefault();
+
+            var url = $(this).attr("action");
+            var actualEvent = $("select#event_dropdown").val();
+            var data = $(this).serializeArray();
+            data.push( {name: "actualEvent", value: actualEvent} );
+
+
+            $.post(url, data)
+        });
+    </script>
 
     <script type="text/javascript">
       function setValue() {

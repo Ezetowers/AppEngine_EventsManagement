@@ -1,6 +1,7 @@
 import os
 import urllib
 import sys
+import logging
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
@@ -52,17 +53,17 @@ class MainPage(webapp2.RequestHandler):
 
 
 class AddGuest(webapp2.RequestHandler):
-    @ndb.transactional(retries=3)
+    # @ndb.transactional(retries=3)
     def increment_guest_count(self, event_name):
         try:
-            events_query = Event(ancestor=event_key())
+            events_query = Event.query(ancestor=events_key())
             events = events_query.fetch()
 
             for event in events:
                 if event.name == event_name:
                     # We found the event. increment the count
-                    sys.exit(-1)
                     if int(event.capacity) > int(event.guests):
+
                         amount_guests = int(event.guests) + 1
                         event.guests = str(amount_guests)
                         event.put()
@@ -76,7 +77,7 @@ class AddGuest(webapp2.RequestHandler):
             return True
 
     def post(self):
-        event_name = self.request.get('guest_event_name')
+        event_name = self.request.get('actualEvent')
         self.increment_guest_count(event_name)
 
         # Add the guest
