@@ -8,12 +8,14 @@ from google.appengine.ext import ndb
 
 import jinja2
 import webapp2
+import json
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
+    
 
 # Store all the events with the same key just because google said it is 
 # necessary
@@ -44,9 +46,18 @@ class MainPage(webapp2.RequestHandler):
         events_query = Event.query(ancestor=events_key())
         events = events_query.fetch()
 
+        guest_list = []
+        for event in events:
+            guest_query = Guest.query(ancestor=event_guests_key(event.name))
+            guests_by_event = guest_query.fetch()
+            guest_list.append((event.name, guests_by_event))
+
         template_values = {
-            'events': events
+            'events': events,
+            'guests_list': guest_list
         }
+
+        # logging.debug(template_values)
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
@@ -78,14 +89,17 @@ class AddGuest(webapp2.RequestHandler):
 
     def post(self):
         event_name = self.request.get('actualEvent')
+
         self.increment_guest_count(event_name)
 
         # Add the guest
-        guest = Guest(parent=event_guests_key("Mon"))
-        guest.name = self.request.get('guest_name')
-        guest.surname = self.request.get('guest_surname')
-        guest.email = self.request.get('guest_email')
-        guest.company = self.request.get('guest_company')
+        logging.debug("Actual event: " + event_name)
+
+        guest = Guest(parent=event_guests_key(event_name))
+        guest.name = self.request.get('guestName')
+        guest.surname = self.request.get('guestSurname')
+        guest.email = self.request.get('guestEmail')
+        guest.company = self.request.get('guestCompany')
         guest.put()
 
         query_params = {'event_name': event_name}
@@ -95,9 +109,8 @@ class AddGuest(webapp2.RequestHandler):
 class EventsCreation(webapp2.RequestHandler):
     def post(self):
         # Get all the events to check if the event already exists
-        name = self.request.get('event_name')
-        # TODO: Check if this is a number
-        capacity = int(self.request.get('event_capacity'))
+        name = self.request.get('eventName')
+        capacity = int(self.request.get('eventCapacity'))
 
         # Upload a new event if this name and capacity are valid
         if name:
@@ -109,7 +122,6 @@ class EventsCreation(webapp2.RequestHandler):
 
         query_params = {'event_name': name}
         self.redirect('/?' + urllib.urlencode(query_params))
-
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
