@@ -2,160 +2,200 @@
 {% autoescape true %}
 <html>
   <head>
-	<link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+  <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
   </head>
-  <body>
-	<h1>Towers' Event Hosting Web Page</h1>
+  <body onload="pageLoaded()">
+  <h1>Towers' Event Hosting Web Page</h1>
 
-	<form id="eventCreationForm" action="/event_creation" method="post">
-	  <h2>Create a new Event:</h2>
-	  <br>
-	  <label>Event Name:</label>
-	  <input type="text" id ="eventCreationName" name="eventName">
-	  <br>
+  <form id="eventCreationForm" action="/event_creation" method="post">
+    <h2>Create a new Event:</h2>
+    <br>
+    <label>Event Name:</label>
+    <input type="text" id ="eventCreationName" name="eventName">
+    <br>
 
-	  <label>Event Capacity:</label>
-	  <input type="text" id ="eventCreationCapacity" name="eventCapacity">
-	  <br>
+    <label>Event Capacity:</label>
+    <input type="text" id ="eventCreationCapacity" name="eventCapacity">
+    <br>
 
-	  <input type="submit" value="Add Event">
-	</form>
+    <input type="submit" value="Add Event">
+  </form>
 
-	<hr>
+  <hr>
 
-	<form id="eventManagementForm" action="/event_management" method="post">
-	  <label>Choose an event: </label>
-	  <select id="eventDropdown" onchange="updateSelectedEventData()">
-		<option value="" disabled selected style="display:none;">-</option>
-		{% for event in events %}
-		<option value="{{event.name}}">{{event.name}}</option>
-		{% endfor %}
-	  </select>
+  <form id="eventManagementForm" action="/event_management" method="post">
+    <label>Choose an event: </label>
+    <select id="eventDropdown" onchange="updateSelectedEventData()">
+    <option value="" disabled selected style="display:none;">-</option>
+    {% for event in events %}
+    <option value="{{event.name}}">{{event.name}}</option>
+    {% endfor %}
+    </select>
+    <br>
 
-		{% for guests in guests_list %}
-		<h3> Table: {{guests[0]}} </h3>
-		<table id="table{{guests[0]}}" border="1">
-			<tr>
-				<th> Guest Name </th>
-				<th> Guest Surname </th>
-			</tr>
-			{% for guest in guests[1] %}
-			<tr>
-				<td> {{ guest.name }} </td>
-				<td> {{ guest.surname }} </td>
-			</tr>
-			{% endfor %}
-		</table>
-		{% endfor %}
-			
-	  <br>
+    <label id="eventCapacity">Event Capacity: 0</label>
+    <br>
+    <label id="eventGuests">Suscribed Guests: 0</label>
+  </form>
 
-	  <label id="eventCapacity">Event Capacity: 0</label>
-	  <br>
-	  <label id="eventGuests">Suscribed Guests: 0</label>
-	</form>
+  {% for guests in guests_list %}
+  <div id="table{{guests[0]}}">
+    <h3> Table: {{guests[0]}} </h3>
+    <table class="cTable">
+      <tr>
+        <th> Name </th>
+        <th> Surname </th>
+        <th> E-Mail </th>
+        <th> Company </th>
+      </tr>
+      {% for guest in guests[1] %}
+      <tr>
+        <td> {{ guest.name }} </td>
+        <td> {{ guest.surname }} </td>
+        <td> {{ guest.email }} </td>
+        <td> {{ guest.company }} </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endfor %}
 
-	<hr>
+  <hr>
 
-	  <form id="guestsForm" action="/add_guest" method="post">
-		<h3 id ="guestsFormTitle"></h3>
-		<label>Name:</label>
-		<input type="text" id="guestName" name="guestName">
-		<br>
+    <form id="guestsForm" action="/add_guest" method="post">
+    <h3 id ="guestsFormTitle"></h3>
+    <label>Name:</label>
+    <input type="text" id="guestName" name="guestName">
+    <br>
 
-		<label>Surname:</label>
-		<input type="text" id="guestSurname" name="guestSurname">
-		<br>
+    <label>Surname:</label>
+    <input type="text" id="guestSurname" name="guestSurname">
+    <br>
 
-		<label>E-Mail:</label>
-		<input type="text" id="guestEmail" name="guestEmail">
-		<br>
+    <label>E-Mail:</label>
+    <input type="text" id="guestEmail" name="guestEmail">
+    <br>
 
-		<label>Company:</label>
-		<input type="text" id="guestCompany" name="guestCompany">
-		<br>
+    <label>Company:</label>
+    <input type="text" id="guestCompany" name="guestCompany">
+    <br>
 
-		<input type="submit" value="Join">
-	  </form>
+    <input type="submit" value="Join">
+    </form>
 
-	<hr>
+  <hr>
 
-	<!-- This is a F5 button like. I don't know if this is correct,
-	but it works for me at least -->
-	<form id="dataUpdater" action="/updater" method="post">
-		<input type="submit" value="Update Event Page">
-	</form>
+  <!-- This is a F5 button like. I don't know if this is correct,
+  but it works for me at least -->
+  <form id="dataUpdater" action="/" method="get">
+    <input id="dataUpdaterButton" type="submit" value="Update Event Page">
+  </form>
 
+  <!-- JQuery scripts -->
+  <script>
+    $("#guestsForm").submit(function(event) {
+      event.preventDefault();
 
-	<!-- JQuery scripts -->
-	<script>
-		$(function() {
-			var guestsForm = $("#guestsForm");
-			guestsForm.hide();
-		});
+      if ($("#guestName").val() == "") {
+        alert("Guest Name can't be empty");
+        return;
+      }
+      if ($("#guestSurname").val() == "") {
+        alert("Guest Surname can't be empty");
+        return;
+      }
+      if ($("#guestEmail").val() == "") {
+        alert("Guest Email can't be empty");
+        return;
+      }
+      if ($("#guestCompany").val() == "") {
+        alert("Guest Company can't be empty");
+        return;
+      }
 
-		$("#guestsForm").submit(function(event) {
-			event.preventDefault();
+      var url = $(this).attr("action");
+      var actualEvent = $("select#eventDropdown").val();
+      var data = $(this).serializeArray();
+      data.push( {name: "actualEvent", value: actualEvent} );
+      $.post(url, data, 
+        function(data) {
+          if (data.add == "true") {
+            alert("Guest was succesfully joined to the event.");
+          }
+          else {
+            alert("Event is full. Could not add guest.");
+          }
+        }, "json");
 
-			var url = $(this).attr("action");
-			var actualEvent = $("select#eventDropdown").val();
-			var data = $(this).serializeArray();
-			data.push( {name: "actualEvent", value: actualEvent} );
-			$.post(url, data);
+      // Erase all the value of the text of guestForm
+      $("#guestName").val('');
+      $("#guestSurname").val('');
+      $("#guestEmail").val('');
+      $("#guestCompany").val('');
+    });
 
-			// Erase all the value of the text of guestForm
-			$("#guestName").val('')
-			$("#guestSurname").val('')
-			$("#guestEmail").val('')
-			$("#guestCompany").val('')
-		});
+    $("#eventCreationForm").submit(function(event) {
+      var name = $("#eventCreationName").val();
+      if (name == "") {
+        alert("Event name must not be empty");
+        event.preventDefault();
+        return;
+      }
 
-		$("#eventCreationForm").submit(function(event) {
-			var name = $("#eventCreationName").val();
-			if (name == "") {
-				alert("Event name must not be empty");
-				return;
-			}
+      var capacity = $("#eventCreationCapacity").val();
+      if (capacity == "") {
+        alert("Event capacity must not be empty");
+        event.preventDefault();
+        return;
+      }
 
-			var capacity = $("#eventCreationCapacity").val();
-			if (capacity == "") {
-				alert("Event capacity must not be empty");
-				event.preventDefault();
-				return;
-			}
+      if ($.isNumeric(capacity) != true) {
+        alert("Event capacity must be a number");
+        event.preventDefault();
+        return;
+      }
+    });
+  </script>
 
-			if ($.isNumeric(capacity) != true) {
-				alert("Event capacity must be a number");
-				event.preventDefault();
-			}
-		});
-	</script>
+  <!-- Plain javascript functions -->
+  <script type="text/javascript">
+    function pageLoaded() {
+      var guestsForm = $("#guestsForm");
+      guestsForm.hide();
 
-	<script type="text/javascript">
-	  function updateSelectedEventData() {
-		var e = document.getElementById("eventDropdown");
-		var value = e.options[e.selectedIndex].value;
+      {%for event in events %}
+        $("#table{{event.name}}").hide();
+      {% endfor %}
+    }
 
-		if (value != "-") {
-			$("#guestsForm").show();
-			document.getElementById("guestsFormTitle").innerHTML = 
-				value + " Event";
-		}
+    function updateSelectedEventData() {
+      var e = document.getElementById("eventDropdown");
+      var value = e.options[e.selectedIndex].value;
 
-		{% for event in events %}
-		  if (value == "{{event.name}}") {
-			document.getElementById("eventCapacity").innerHTML
-			  = 'Event Capacity: ' + "{{event.capacity}}";
-			document.getElementById("eventGuests").innerHTML
-			  = 'Suscribed Guests: ' + "{{event.guests}}";
-		  }
+      {% for event in events %}
+      $("#table{{event.name}}").hide();
+      {% endfor %}
 
-		{% endfor %}
+      if (value != "-") {
+        $("#guestsForm").show();
+        document.getElementById("guestsFormTitle").innerHTML = 
+          value + " Event";
+        $("#table" + value).show();
+      }
 
-		return;
-	  }
-	</script>
+      {% for event in events %}
+      if (value == "{{event.name}}") {
+        document.getElementById("eventCapacity").innerHTML
+          = 'Event Capacity: ' + "{{event.capacity}}";
+        document.getElementById("eventGuests").innerHTML
+          = 'Suscribed Guests: ' + "{{event.guests}}";
+      }
+      {% endfor %}
+
+      return;
+    }
+  </script>
 
   </body>
 </html>
