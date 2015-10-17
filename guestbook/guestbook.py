@@ -127,9 +127,37 @@ class EventsCreation(webapp2.RequestHandler):
         query_params = {'event_name': name}
         self.redirect('/?' + urllib.urlencode(query_params))
 
+
+class EventRemoval(webapp2.RequestHandler):
+    @ndb.transactional(retries=3)
+    def delete_event(self, event_name):
+        events_query = Event.query(ancestor=events_key())
+        events = events_query.fetch()
+
+        for event in events:
+            if event.name == event_name:
+                logging.warning("DELETING EVENT " + event_name)
+                event.key.delete()
+                return True
+
+        return False
+
+    def post(self):
+        actual_event = self.request.get('event')
+        logging.debug("Event to remove: " + actual_event)
+
+        if self.delete_event(actual_event) == True:
+            self.response.headers['Content-Type'] = "application/json"
+            self.response.out.write(json.dumps({'deleted' : 'true'}))
+        else:
+            self.response.headers['Content-Type'] = "application/json"
+            self.response.out.write(json.dumps({'deleted' : 'false'}))
+
+
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/updater', MainPage),
     ('/event_creation', EventsCreation),
+    ('/event_removal', EventRemoval),
     ('/add_guest', AddGuest),
 ], debug=True)

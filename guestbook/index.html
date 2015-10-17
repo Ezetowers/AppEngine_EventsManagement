@@ -7,6 +7,15 @@
   </head>
   <body onload="pageLoaded()">
   <h1>Towers' Event Hosting Web Page</h1>
+  <div id="homerWebPage" class="toshow" float="right">
+    <img src="http://www.homerswebpage.com/flash/tostadora_100px1.gif"/>
+    <img src="http://www.homerswebpage.com/flash/boca_90px1.gif"/>
+    <img src="http://www.homerswebpage.com/flash/gusano_60px1.gif"/>
+    <img src="https://38.media.tumblr.com/tumblr_m674jlpyPT1ry8fquo1_250.gif"/>
+    <img src="http://www.homerswebpage.com/flash/campana_60px1.gif"/>
+    <img src="http://www.homerswebpage.com/flash/reloj_60px1.gif"/>
+    <img src="http://www.homerswebpage.com/flash/tostadora_100px1.gif"/>
+  </div>
 
   <form id="eventCreationForm" action="/event_creation" method="post">
     <h2>Create a new Event:</h2>
@@ -39,9 +48,13 @@
     <label id="eventGuests">Suscribed Guests: 0</label>
   </form>
 
+  <button id ="deleteEvent" onclick="deleteEvent()">
+    Delete Actual Event
+  </button>
+
   {% for guests in guests_list %}
   <div id="table{{guests[0]}}">
-    <h3> Table: {{guests[0]}} </h3>
+    <h3> {{guests[0]}} Guests List</h3>
     <table class="cTable">
       <tr>
         <th> Name </th>
@@ -94,6 +107,12 @@
 
   <!-- JQuery scripts -->
   <script>
+    $("#guestCompany").keydown(function(event) {
+      if (event.keyCode == 118) {
+        $("#homerWebPage").show();
+      }
+    });
+
     $("#guestsForm").submit(function(event) {
       event.preventDefault();
 
@@ -126,13 +145,14 @@
           else {
             alert("Event is full. Could not add guest.");
           }
+          window.location.reload(true);
         }, "json");
 
       // Erase all the value of the text of guestForm
-      $("#guestName").val('');
+      /*$("#guestName").val('');
       $("#guestSurname").val('');
       $("#guestEmail").val('');
-      $("#guestCompany").val('');
+      $("#guestCompany").val('');*/
     });
 
     $("#eventCreationForm").submit(function(event) {
@@ -161,12 +181,29 @@
   <!-- Plain javascript functions -->
   <script type="text/javascript">
     function pageLoaded() {
-      var guestsForm = $("#guestsForm");
-      guestsForm.hide();
+      $("#guestsForm").hide();
+      $("#deleteEvent").hide();
+      $("#homerWebPage").hide();
 
       {%for event in events %}
         $("#table{{event.name}}").hide();
       {% endfor %}
+    }
+
+    function deleteEvent() {
+      var e = document.getElementById("eventDropdown");
+      var value = e.options[e.selectedIndex].value;
+
+      var actualEvent = {event : value};
+      $.post("/event_removal", actualEvent, function(data) {
+          if (data.deleted == "true") {
+            alert("Event was succesfully deleted.");
+          }
+          else {
+            alert("Event could not be deleted.");
+          }
+          window.location.reload(true);
+        }, "json");
     }
 
     function updateSelectedEventData() {
@@ -180,8 +217,9 @@
       if (value != "-") {
         $("#guestsForm").show();
         document.getElementById("guestsFormTitle").innerHTML = 
-          value + " Event";
+          value + " Event Subscription";
         $("#table" + value).show();
+        $("#deleteEvent").show();
       }
 
       {% for event in events %}
