@@ -57,6 +57,8 @@ class MainPage(webapp2.RequestHandler):
             'guests_list': guest_list
         }
 
+        logging.debug(template_values)
+
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
 

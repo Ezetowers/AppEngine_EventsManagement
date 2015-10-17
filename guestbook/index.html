@@ -8,13 +8,13 @@
   <body onload="pageLoaded()">
   <h1>Towers' Event Hosting Web Page</h1>
   <div id="homerWebPage" class="toshow" float="right">
-    <img src="http://www.homerswebpage.com/flash/tostadora_100px1.gif"/>
+    <!--<img src="http://www.homerswebpage.com/flash/tostadora_100px1.gif"/>
     <img src="http://www.homerswebpage.com/flash/boca_90px1.gif"/>
     <img src="http://www.homerswebpage.com/flash/gusano_60px1.gif"/>
     <img src="https://38.media.tumblr.com/tumblr_m674jlpyPT1ry8fquo1_250.gif"/>
     <img src="http://www.homerswebpage.com/flash/campana_60px1.gif"/>
     <img src="http://www.homerswebpage.com/flash/reloj_60px1.gif"/>
-    <img src="http://www.homerswebpage.com/flash/tostadora_100px1.gif"/>
+    <img src="http://www.homerswebpage.com/flash/tostadora_100px1.gif"/>-->
   </div>
 
   <form id="eventCreationForm" action="/event_creation" method="post">
@@ -75,35 +75,27 @@
   {% endfor %}
 
   <hr>
+  <form id="guestsForm" action="/add_guest" method="post">
+  <h3 id ="guestsFormTitle"></h3>
+  <label>Name:</label>
+  <input type="text" id="guestName" name="guestName">
+  <br>
 
-    <form id="guestsForm" action="/add_guest" method="post">
-    <h3 id ="guestsFormTitle"></h3>
-    <label>Name:</label>
-    <input type="text" id="guestName" name="guestName">
-    <br>
+  <label>Surname:</label>
+  <input type="text" id="guestSurname" name="guestSurname">
+  <br>
 
-    <label>Surname:</label>
-    <input type="text" id="guestSurname" name="guestSurname">
-    <br>
+  <label>E-Mail:</label>
+  <input type="text" id="guestEmail" name="guestEmail">
+  <br>
 
-    <label>E-Mail:</label>
-    <input type="text" id="guestEmail" name="guestEmail">
-    <br>
+  <label>Company:</label>
+  <input type="text" id="guestCompany" name="guestCompany">
+  <br>
 
-    <label>Company:</label>
-    <input type="text" id="guestCompany" name="guestCompany">
-    <br>
-
-    <input type="submit" value="Join">
-    </form>
-
-  <hr>
-
-  <!-- This is a F5 button like. I don't know if this is correct,
-  but it works for me at least -->
-  <form id="dataUpdater" action="/" method="get">
-    <input id="dataUpdaterButton" type="submit" value="Update Event Page">
+  <input type="submit" value="Join">
   </form>
+  <hr>
 
   <!-- JQuery scripts -->
   <script>
@@ -147,12 +139,6 @@
           }
           window.location.reload(true);
         }, "json");
-
-      // Erase all the value of the text of guestForm
-      /*$("#guestName").val('');
-      $("#guestSurname").val('');
-      $("#guestEmail").val('');
-      $("#guestCompany").val('');*/
     });
 
     $("#eventCreationForm").submit(function(event) {
