@@ -5,6 +5,7 @@ import logging
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
+import google.appengine.ext.db
 
 import jinja2
 import webapp2
@@ -62,40 +63,40 @@ class MainPage(webapp2.RequestHandler):
 
 
 class AddGuest(webapp2.RequestHandler):
-    @ndb.transactional(retries=3)
+    @ndb.transactional(xg=True)
     def increment_guest_count(self, event_name):
-        try:
-            events_query = Event.query(ancestor=events_key())
-            events = events_query.fetch()
+        events_query = Event.query(ancestor=events_key())
+        events = events_query.fetch()
 
-            for event in events:
-                if event.name == event_name:
-                    # We found the event. increment the count
-                    logging.debug("Event: " + event_name +\
-                        " - Capacity: " + event.capacity)
-                    logging.debug("Event: " + event_name +\
-                        " - Guests: " + event.guests)
-                    if int(event.capacity) > int(event.guests):
-                        logging.debug("Event " + event_name +\
-                            ": There is capacity")
-                        amount_guests = int(event.guests) + 1
-                        event.guests = str(amount_guests)
-                        event.put()
-                        return True
-                    else:
-                        logging.debug("Event " + event_name +\
-                            ": There ISN'T capacity")
-                        return False
-        except TransactionFailedError:
-            # Exit in this case
-            sys.exit(-1)
+        for event in events:
+            if event.name == event_name:
+                # We found the event. increment the count
+                logging.debug(
+                    "Event: " + event_name +
+                    " - Capacity: " + event.capacity)
+                logging.debug(
+                    "Event: " + event_name +
+                    " - Guests: " + event.guests)
+                if int(event.capacity) > int(event.guests):
+                    logging.debug(
+                        "Event " + event_name +
+                        ": There is capacity")
+                    amount_guests = int(event.guests) + 1
+                    event.guests = str(amount_guests)
+                    event.put()
+                    return True
+                else:
+                    logging.debug(
+                        "Event " + event_name +
+                        ": There ISN'T capacity")
+                    return False
 
     def post(self):
         event_name = self.request.get('actualEvent')
 
-        if self.increment_guest_count(event_name) == False:
+        if not self.increment_guest_count(event_name):
             self.response.headers['Content-Type'] = "text/plain"
-            self.response.out.write(json.dumps({'add' : 'false'}))
+            self.response.out.write(json.dumps({'add': 'false'}))
             return
         else:
             # Add the guest
@@ -108,7 +109,6 @@ class AddGuest(webapp2.RequestHandler):
 
             self.response.headers['Content-Type'] = "application/json"
             self.response.out.write(json.dumps({'add' : 'true'}))
-
 
 class EventsCreation(webapp2.RequestHandler):
     def post(self):
@@ -129,11 +129,10 @@ class EventsCreation(webapp2.RequestHandler):
 
 
 class EventRemoval(webapp2.RequestHandler):
-    @ndb.transactional(xg=True, retries=3)
+    @ndb.transactional(xg=True)
     def delete_event(self, event_name):
         events_query = Event.query(ancestor=events_key())
         events = events_query.fetch()
-
 
         for event in events:
             if event.name == event_name:
@@ -156,7 +155,7 @@ class EventRemoval(webapp2.RequestHandler):
         actual_event = self.request.get('event')
         logging.debug("Event to remove: " + actual_event)
 
-        if self.delete_event(actual_event) == True:
+        if self.delete_event(actual_event):
             self.response.headers['Content-Type'] = "application/json"
             self.response.out.write(json.dumps({'deleted' : 'true'}))
         else:
