@@ -1,0 +1,100 @@
+\documentclass[a4paper,10pt]{article}
+%\usepackage[latin1]{inputenc} % Paquetes de idioma (otro encoding)
+\usepackage[utf8]{inputenc} % Paquetes de idioma
+\usepackage[spanish]{babel} % Paquetes de idioma
+\usepackage{graphicx} % Paquete para ingresar gráficos
+\usepackage{grffile}
+\usepackage{hyperref}
+\usepackage{fancybox}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{pdfpages}
+% Paquetes de macros de Circuitos
+%\usepackage{pstricks}
+\usepackage{tikz}
+
+% Encabezado y Pié de página
+\input{EncabezadoyPie.tex}
+% Carátula del Trabajo
+\title{ \input{Portada.tex} }
+
+\begin{document}
+	\maketitle % Hace que el título anterior sea el principal del documento
+	\newpage
+
+    % Esta línea genera un indice a partir de las secciones y 
+    % subsecciones creadas en el documento
+	\tableofcontents 
+	\newpage
+
+	\section{Introducción}
+		El presente trabajo práctico consiste en diseñar e implementar un sistema de recepción de eventos a través
+        de la plataforma de cloud computing de google \href{http://cloud.google.com/appengine}{App Engine}. El
+        presente sistema debe permitir el ingreso de personas invitadas en diferentes eventos, como asi también
+        tener la posibilidad de poder consultar quienes son los invitados anotados en cada uno de ellos.
+          
+         
+    \section{Desarrollo}
+        Google App Engine permite realizar el desarrollo de las aplicaciones web a través de los siguientes 
+        lenguajes de programación:
+
+        \begin{itemize}
+            \item Java
+            \item Python
+            \item Go
+            \item PHP
+        \end{itemize}
+
+        Debido a la simplicidad del lenguaje y la falta de conocimientos en las otras opciones, se decidió implementar
+        el sistema en Python. App Engine permite realizar el desarrollo de la parte Servidor a través de cualquier
+        web framework de Python que implemente la interfaz WSGI(Web Service Gateway Interface). Se lista a continuación
+        algunos de los frameworks que cumplen con esta especificación:
+        
+        \begin{itemize}
+            \item Django
+            \item CherryPy
+            \item Pylon 
+            \item web.py
+            \item web2pyi
+            \item webapp2
+        \end{itemize}
+
+        Para realizar la presente aplicación se decidió utilizar \text{webapp2}. El motivo de esta elección es que
+        la complejidad del presente proyecto era baja y los tutoriales de google respecto a las aplicaciones de 
+        Python para App Engine están desarrolladas con este framework. \\
+        \indent Para el desarrollo y diseño de la página web se utilizó HTML, scripts en Javascript y JQuery 
+        y el template language Jinja2. Este último fue utilizado la generación estática del página principal del 
+        proyecto, la cual nuevamente se realizó en función del 
+        \href{https://cloud.google.com/appengine/docs/python/gettingstartedpython27/introduction}{tutorial de App Engine}.
+        
+
+    \newpage
+    \section{Arquitectura 4 + 1}
+
+    \newpage
+    \subsection{Casos de Uso}
+
+    \newpage
+    \subsection{Vista Lógica}
+
+    \newpage
+    \subsection{Vista de Actividad}
+
+    \newpage
+    \subsection{Vista de Despliegue}
+
+    \newpage
+    \section{Resultados}
+        TODO:
+
+    \newpage
+    \subsection{Pruebas de Carga}
+
+    \newpage
+    \section{Conclusión} 
+        TODO:
+
+\end{document}
+        
+      
