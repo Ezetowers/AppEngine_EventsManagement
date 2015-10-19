@@ -1,9 +1,0 @@
-<testcases>
-  <case>
-    <url>http://localhost:8080/add_guest</url>
-    <!--<url>https://firstproyect-1084.appspot.com/add_guest</url>-->
-    <method>POST</method>
-    <body><![CDATA[actualEvent=Mondongo&guestName=Phil&guestSurname=Collins&guestEmail=philcollins@gmail.com&guestCompany=GenesisSRL]]></body>
-    <add_header>Content-type: application/x-www-form-urlencoded</add_header>
-  </case>
-</testcases>
