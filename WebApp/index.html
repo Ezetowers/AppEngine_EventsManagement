@@ -129,6 +129,7 @@
       var actualEvent = $("select#eventDropdown").val();
       var data = $(this).serializeArray();
       data.push( {name: "actualEvent", value: actualEvent} );
+      data.push( {name: "checkDuplicates", value: "true"} );
       $.post(url, data, 
         function(data) {
           if (data.add == "true") {

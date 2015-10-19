@@ -3,7 +3,7 @@ import sys
 
 REQUEST_BODY_PART_1 = '<![CDATA[actualEvent='
 REQUEST_BODY_PART_2 = '&guestName=Phil&guestSurname=Collins&guestCompany=GenesisSRL&guestEmail='
-REQUEST_BODY_PART_3 = ']]>'
+REQUEST_BODY_PART_3 = '&checkDuplicates=false]]>'
 CONTENT_TYPE = 'Content-type: application/x-www-form-urlencoded'
 
 

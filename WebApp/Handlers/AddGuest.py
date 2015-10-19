@@ -46,8 +46,10 @@ class AddGuest(webapp2.RequestHandler):
 
     def post(self):
         event_name = self.request.get('actualEvent')
+        check_duplicates = self.request.get('checkDuplicates')
 
-        if self.guest_exists(self.request.get('guestEmail'), event_name):
+        if check_duplicates == "true" and\
+            self.guest_exists(self.request.get('guestEmail'), event_name):
             self.response.headers['Content-Type'] = "application/json"
             self.response.out.write(json.dumps({'add': 'duplicated'}))
             return
