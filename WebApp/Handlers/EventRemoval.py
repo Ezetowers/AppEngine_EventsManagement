@@ -12,12 +12,15 @@ class EventRemoval(webapp2.RequestHandler):
         events_query = Event.query(ancestor=events_key())
         events = events_query.fetch()
 
+        found = False
         for event in events:
             if event.name == event_name:
                 logging.warning("DELETING EVENT " + event_name)
                 event.key.delete()
-            else:
-                return False
+                found = True
+                
+        if not found:
+            return False
 
         # Delete all the guests related with this event
         guests_query = Guest.query(ancestor=event_guests_key(event_name))

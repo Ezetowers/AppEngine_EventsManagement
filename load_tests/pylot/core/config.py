@@ -13,14 +13,14 @@
  
 # Configuration options here are overridden if specified on the command line
 
-AGENTS = 5
-DURATION = 50 # secs
-RAMPUP = 1 # secs
-INTERVAL = 90 # millisecs
+AGENTS = 15
+DURATION = 30 # secs
+RAMPUP = 0 # secs
+INTERVAL = 100 #  millisecs
 TC_XML_FILENAME = 'test_case.xml'
 OUTPUT_DIR = None
 TEST_NAME = None 
-LOG_MSGS = True
+LOG_MSGS = False
 
 GENERATE_RESULTS = False
 SHUFFLE_TESTCASES = False  # randomize order of testcases per agent

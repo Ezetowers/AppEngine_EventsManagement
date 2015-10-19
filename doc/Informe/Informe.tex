@@ -13,6 +13,7 @@
 % Paquetes de macros de Circuitos
 %\usepackage{pstricks}
 \usepackage{tikz}
+\usepackage{color}
 
 % Encabezado y Pié de página
 \input{EncabezadoyPie.tex}
@@ -71,30 +72,131 @@
 
     \newpage
     \section{Arquitectura 4 + 1}
-
-    \newpage
     \subsection{Casos de Uso}
+        En la figura \ref{DiagCU} se exhibe el diagrama de casos de uso del sistema. Se detalla a continuación cada
+        una de las entradas del mismo:
+
+        \begin{figure}[!Hhtb]                                             
+            \centering                                                   
+            \includegraphics[width=15cm,origin=c]{Imagenes/Casos_De_Uso.pdf}        
+            \caption{Diagrama de Casos de Uso} \label{DiagCU}
+        \end{figure}
+
+        \begin{itemize}
+            \item \textbf{Suscribir Invitado:} Un invitado ingresa sus datos pertinentes a la página web e intenta
+            registrarse. El sistema toma como identificador único del usuario su email, por lo cual en el caso de
+            que ya exista una persona en el mismo evento con el mismo email, la invitación será rechazada.
+            \item \textbf{Consultar Invitados:} Un usuario administrador o invitado elige el evento a consultar. Al 
+            hacerlo, la página web muestra en una tabla la lista de invitados actual del evento.  
+            \item \textbf{Crear Evento:} Un usuario administrador crea un evento e ingresa el nombre y la 
+            máxima cantidad de invitados del mismo.  
+            \item \textbf{Borrar Evento:} Un usuario administrador posicionado sobre un evento específico elimina 
+            al mismo. Al hacer esto, se borrará del storage de la aplicación el evento junto con todos los invitados
+            registrados en el mismo.
+            \end{itemize}
+
+        Cabe destacar que no existe el caso de uso \textbf{Desuscribir Invitado} debido a que el enunciado no 
+        especificaba este caso. El caso \textbf{Borrar Evento} fue agregado solamente para poder eliminar fácilmente
+        aquellos eventos creados a partir de pruebas de carga.
+
 
     \newpage
     \subsection{Vista Lógica}
+        En la figura \ref{DiagClases} se exhibe el diagrama de clases, el cual muestra la vista lógica del sistema. 
+        A continuación se adjunta una breve explicación de cada una de las clases:
+
+        \begin{figure}[!Hhtb]                                             
+            \centering                                                   
+            \includegraphics[width=15cm,origin=c]{Imagenes/Clases.pdf}        
+            \caption{Diagrama de Clases} \label{DiagClases}
+        \end{figure}
+
+        \begin{itemize}
+            \item \textbf{AddGuest:} Clase derivada de RequestHandler. Al recibir un post, se encarga de validar
+            que el invitado a ingresar no exista y luego agrega al mismo. Además, chequea si el evento permite
+            ingresar más invitados anter de dar el alta.
+            \item \textbf{EventsCreation:} Clase que deriva de RequestHandler. Al recibir un post, crea un evento
+            nuevo en el datastorage
+            \item \textbf{EventRemoval:} Clase que deriva de RequestHandler. Al recibir un post, obtiene el evento
+            pasado por parámetro y elimina al mismo junto con todos los invitados asociados.
+            \item \textbf{Event:} Objeto que represeta a un evento en el datastorage.
+            \item \textbf{Guest:} Objeto que representa a un invitado en el datastorage.
+        \end{itemize}
+
+    % \newpage
+    % \subsection{Vista de Procesos}
+
+    % \newpage
+    % \subsection{Vista Física}
 
     \newpage
-    \subsection{Vista de Actividad}
+    \section{Pruebas de Carga}
+        La aplicación en la nube se puede acceder a través del siguiente 
+        \href{https://poised-throne-110314.appspot.com}{link}.
+        Para probar la performance de la misma, se investigaron diferentes simuladores de carga. Los requisitos del  
+        simulador a buscar son los siguientes:
 
-    \newpage
-    \subsection{Vista de Despliegue}
+        \begin{itemize}
+            \item \textbf{Simplicidad:} La aplicación a testear es muy sencilla. Solo se desea enviar un POST al 
+            servidor con ciertos datos y analizar como responde el mismo. 
+            \item \textbf{Flexibilidad:}El simulador debe tener la capacidad de poder recibir un conjunto de tests y 
+            ejecutar los mismos de forma automática.
+            \item \textbf{Concurrencia:} El simulador debe poder lanzar los tests desde N procesos/threads diferentes, 
+            para poder probar la concurrencia del sistema Web.
+        \end{itemize}
 
-    \newpage
-    \section{Resultados}
-        TODO:
+        Los primeros simuladores a probar fueron \href{http://http://jmeter.apache.org}{Jmeter} y 
+        \href{http://grinder.sourceforge.net}{The Grinder}. Jmeter fue descartado inmediatamente al abrir la 
+        documentación la cual posee más de 500 hojas. Claramente este simulador no cumple el requisito de 
+        \textit{Simplicidad} que se estaba buscando. Luego se realizaron pruebas con \textit{The Grinder}. Este 
+        simulador resultó ser más ameno debido a que los tests se programan en Jython. Se intentó utilizar el
+        mismo pero luego de estar una hora sin obtener resultados concretos, se decidió buscar otra alternativa. \\
+        \indent Buscando se encontró \href{http://www.pylot.org/}{Pylot}. El mismo es un simulador de carga que 
+        recibe los tests a través de un xml y con el cual se modificar parámetros de carga a través de un 
+        archivo de configuración. Se muestra a continuación un XML de ejemplo de la simulación de un HTTPRequest. 
 
-    \newpage
-    \subsection{Pruebas de Carga}
+        \lstset{language=XML}
+        \begin{lstlisting}
+<testcases>
+  <case>
+    <url>http://localhost:8080/add_guest</url>
+    <method>POST</method>
+    <body><![CDATA[actualEvent=Mondongo]]></body>
+  </case>
+</testcases>
+        \end{lstlisting}
 
-    \newpage
-    \section{Conclusión} 
-        TODO:
+        \vspace{1cm}
+        \noindent El simulador posee los siguientes parámetros a configurar:
+        \begin{itemize}
+            \item \textbf{Agents:} Cantidad de threads a lanzar para realizar las simulaciones.
+            \item \textbf{Duration:} Duración (en segundos) de la simulación.
+            \item \textbf{RampUp:} Tiempo (en segundos) a esperar entre el lanzamiento de un agente y el proximo.
+            \item \textbf{Interval:} Periodicidad con la cual un agente realiza un test en función de las pruebas
+            almacenadas en el XML.
+        \end{itemize}
+
+        \subsection{Resultados}
+            Se muestra a continuación los resultados de las pruebas de cargas realizadas. En las mismas se muestra
+            como se fueron modificando los parámetros del simulador, junto con la respuesta de la WebApp. 
+
+            \vspace{1cm}
+            \hspace*{-3cm} 
+            \begin{tabular}{|c|c|c|c|c|c|c|}
+                \hline
+                \textbf{Agentes} & \textbf{Duración (seg)} & \textbf{RampUp(ms)} & \textbf{Interval(ms)} & \textbf{Resp. Time (ms)} & \textbf{Requests} & \textbf{Errors} \\
+                \hline
+                1 & 30 & 0 & 500 & 452 & 57 & 0 \\
+                \hline 
+                1 & 30 & 0 & 100 & 478 & 61 & 0 \\
+                \hline 
+                5 & 30 & 0 & 100 & 567 & 237 & 0 \\
+                \hline 
+                10 & 30 & 0 & 100 & 1194 & 226 & 37 \\
+                \hline 
+                15 & 30 & 0 & 100 & 1390 & 256 & 78 \\
+                \hline 
+            \end{tabular}
 
 \end{document}
         
-      
