@@ -65,7 +65,7 @@
         la complejidad del presente proyecto era baja y los tutoriales de google respecto a las aplicaciones de 
         Python para App Engine están desarrolladas con este framework. \\
         \indent Para el desarrollo y diseño de la página web se utilizó HTML, scripts en Javascript y JQuery 
-        y el template language Jinja2. Este último fue utilizado la generación estática del página principal del 
+        y el template language Jinja2. Este último fue utilizado la generación dinámica de la página principal del 
         proyecto, la cual nuevamente se realizó en función del 
         \href{https://cloud.google.com/appengine/docs/python/gettingstartedpython27/introduction}{tutorial de App Engine}.
         
@@ -131,8 +131,8 @@
 
     \newpage
     \section{Pruebas de Carga}
-        La aplicación en la nube se puede acceder a través del siguiente 
-        \href{https://poised-throne-110314.appspot.com}{link}.
+        La aplicación en la nube se puede acceder a través del siguiente \href{https://poised-throne-110314.appspot.com}{link} 
+        a través de HTTPS: poised-throne-110314.appspot.com.
         Para probar la performance de la misma, se investigaron diferentes simuladores de carga. Los requisitos del  
         simulador a buscar son los siguientes:
 
@@ -145,6 +145,20 @@
             para poder probar la concurrencia del sistema Web.
         \end{itemize}
 
+        Se detallan a continuación las características de los simuladores investigados:
+
+        \subsection{Jmeter}
+            \href{http://http://jmeter.apache.org}{Apache Jmeter} es un simulador desarrollado por la Apache Software
+            Foundation. Es un completo simulador que permite realizar pruebas de carga complejas utilizando diferentes
+
+        \subsection{The Grinder}
+            \begin{itemize}
+            \end{itemize}
+
+        \subsection{The Grinder}
+            \begin{itemize}
+            \end{itemize}
+
         Los primeros simuladores a probar fueron \href{http://http://jmeter.apache.org}{Jmeter} y 
         \href{http://grinder.sourceforge.net}{The Grinder}. Jmeter fue descartado inmediatamente al abrir la 
         documentación la cual posee más de 500 hojas. Claramente este simulador no cumple el requisito de 
@@ -155,6 +169,7 @@
         recibe los tests a través de un xml y con el cual se modificar parámetros de carga a través de un 
         archivo de configuración. Se muestra a continuación un XML de ejemplo de la simulación de un HTTPRequest. 
 
+        \vspace{1cm}
         \lstset{language=XML}
         \begin{lstlisting}
 <testcases>
