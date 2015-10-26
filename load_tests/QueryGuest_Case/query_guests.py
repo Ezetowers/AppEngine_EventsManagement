@@ -2,8 +2,8 @@ from lxml import etree
 import sys
 
 REQUEST_BODY_PART_1 = '<![CDATA[actualEvent='
-REQUEST_BODY_PART_2 = '&guestName=Phil&guestSurname=Collins&guestCompany=GenesisSRL&guestEmail='
-REQUEST_BODY_PART_3 = '&checkDuplicates=false]]>'
+REQUEST_BODY_PART_2 = '&queryEmail='
+REQUEST_BODY_PART_3 = ']]>'
 CONTENT_TYPE = 'Content-type: application/x-www-form-urlencoded'
 
 
@@ -24,7 +24,7 @@ def main():
 
     for case in range(1,amount_cases):
         case_node = etree.Element('case')
-        etree.SubElement(case_node, 'url').text = url
+        etree.SubElement(case_node, 'url').text = url + "/query_guest"
         etree.SubElement(case_node, 'method').text = 'POST'
         body = REQUEST_BODY_PART_1 + event + REQUEST_BODY_PART_2 + "Email" + str(case) + REQUEST_BODY_PART_3
         etree.SubElement(case_node, 'body').text = body
@@ -32,8 +32,8 @@ def main():
         root.append(case_node)
 
     etree.ElementTree(root).write(test_case_filename,
-                                  pretty_print=True)
-                                  # encoding='iso-8859-1')
+                                  pretty_print=True,
+                                  encoding='iso-8859-1')
 
 # Line to indicate that this is the main
 if __name__ == "__main__":
