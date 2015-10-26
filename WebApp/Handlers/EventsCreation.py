@@ -19,5 +19,4 @@ class EventsCreation(webapp2.RequestHandler):
             event.guests = str(0)
             event.put()
 
-        query_params = {'event_name': name}
-        self.redirect('/?' + urllib.urlencode(query_params))
+        self.redirect('/admin')
